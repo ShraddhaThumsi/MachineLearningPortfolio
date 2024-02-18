@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 path_to_file = '../data/linear_regression_part1_soccerdata.csv'
 df = pd.read_csv(path_to_file)
 
@@ -16,6 +17,8 @@ df = pd.read_csv(path_to_file)
 
 #examining the pearson correlation matrix
 #print(df.corr())
+sns.heatmap(df.corr())
+plt.show()
 
 #cost to hire the player in a club and the score obtained by them in a match is positively correlated with a Pearson coefficient of +0.96
 plt.scatter(df['Cost'],df['Score'])

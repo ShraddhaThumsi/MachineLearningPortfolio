@@ -15,4 +15,5 @@ X_train, X_test, y_train, y_test = train_test_split(x,y,train_size=0.75,test_siz
 #the theoretical material gotten from ProjectPro implements the regression using Statsmodels package. Here I am doing it using sklearn
 lr = LinearRegression()
 lr.fit(X_train, y_train)
-print(lr.score(X_test,y_test)) #the statsmodel version has a score of 0.94, and we are at 0.93.
+print(lr.score(X_test,y_test)) #here score means coefficient of determination
+#the statsmodel version has a score of 0.94, and we are at 0.93.
