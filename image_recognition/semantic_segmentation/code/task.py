@@ -7,9 +7,7 @@ import glob
 import random
 import sys
 
-import skimage.io as io
-import skimage.transform as transform
-from skimage.morphology import label
+
 import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow.keras.layers import *
@@ -26,4 +24,5 @@ IMG_CHANNELS = 3
 
 LEARNING_RATE = 0.001
 NUM_EPOCHS=25
+EXTENSION = 'png'
 
