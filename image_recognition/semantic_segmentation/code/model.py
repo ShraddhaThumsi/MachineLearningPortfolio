@@ -16,14 +16,19 @@ X_data= data_preparation.X_data
 Y_data= data_preparation.Y_data
 X_train, X_test, Y_train, Y_test = task.train_test_split(X_data, Y_data, test_size=0.1,random_state=13)
 train_generator,val_generator,test_generator = utils.augment_data(X_train, Y_train,X_test, Y_test,X_data)
-print(type(train_generator))
-print(type(val_generator))
-print(type(test_generator))
+# print(type(train_generator))
+# print(type(val_generator))
+# print(type(test_generator))
 
 std_img_width = task.IMG_WIDTH
 std_img_height = task.IMG_HEIGHT
 num_channels = task.IMG_CHANNELS
+
+LEARNING_RATE = task.LEARNING_RATE
+NUM_EPOCHS = task.NUM_EPOCHS
+
 def make_model(input_shape=(std_img_width,std_img_height,num_channels),filter_list=[32,64,128,256,512]):
+    print('inside make model function')
     tf.keras.backend.clear_session()
     inputs = Input(shape=input_shape)
     s= (lambda x: x/255.0)(inputs)
@@ -47,9 +52,9 @@ def make_model(input_shape=(std_img_width,std_img_height,num_channels),filter_li
     c3 = Conv2D(32, (3, 3), activation='elu', kernel_initializer='he_normal', padding='same')(c3)
     c3 = Dropout(0.5)(c3)
 
-    conv3_1 = Conv2D(128, (3,3), activation='elu', kernel_initializer='he_normalizer', padding='same')(p2)
+    conv3_1 = Conv2D(128, (3,3), activation='elu', kernel_initializer='he_normal', padding='same')(p2)
     conv3_1 = Dropout(0.5)(conv3_1)
-    conv3_1 = Conv2D(128, (3, 3), activation='elu', kernel_initializer='he_normalizer', padding='same')(conv3_1)
+    conv3_1 = Conv2D(128, (3, 3), activation='elu', kernel_initializer='he_normal', padding='same')(conv3_1)
     conv3_1 = Dropout(0.5)(conv3_1)
     p3 = MaxPooling2D((2,2),(2,2),name='pool3')(conv3_1)
 
@@ -73,16 +78,72 @@ def make_model(input_shape=(std_img_width,std_img_height,num_channels),filter_li
     conv4_1 = Dropout(0.5)(conv4_1)
     p4 = MaxPooling2D((2,2),(2,2),name='pool4')(conv4_1)
 
+    up3_2 = Conv2DTranspose(filter_list[2], (2,2),(2,2),name='up32',padding='same')(conv4_1)
+    conv3_2 = concatenate([up3_2,conv3_1], axis=3, name='merge32')
+    conv3_2 = Conv2D(128,(3,3),activation='elu',kernel_initializer='he_normal',padding='same')(conv3_2)
+    conv3_2 = Dropout(0.5)(conv3_2)
+    conv3_2 = Conv2D(128, (3, 3), activation='elu', kernel_initializer='he_normal', padding='same')(conv3_2)
+    conv3_2 = Dropout(0.5)(conv3_2)
 
+    up2_3 = Conv2DTranspose(filter_list[1], (2,2),(2,2), name='up23', padding='same')(conv3_2)
+    conv2_3 = concatenate([up2_3,c2,conv2_2],name='merge23',axis=3)
+    conv2_3 = Conv2D(64,(3,3),activation='elu',kernel_initializer='he_normal',padding='same')(conv2_3)
+    conv2_3 = Dropout(0.5)(conv2_3)
+    conv2_3 = Conv2D(64, (3, 3), activation='elu', kernel_initializer='he_normal', padding='same')(conv2_3)
+    conv2_3 = Dropout(0.5)(conv2_3)
 
+    up1_4 = Conv2DTranspose(filter_list[0],(2,2),(2,2),name='up14',padding='same')(conv2_3)
 
+    print('created the up14 layer, now need to concatenate with older layers')
 
+    conv1_4 = concatenate([up1_4,c1,c3,conv1_3],name='merge14',axis=3)
+    print('concatenation layer conv14 is done')
+    conv1_4 = Conv2D(32,(3,3),activation='elu',kernel_initializer='he_normal',padding='same')(conv1_4)
+    conv1_4 = Dropout(0.5)(conv1_4)
+    conv1_4 = Conv2D(32, (3, 3), activation='elu', kernel_initializer='he_normal', padding='same')(conv1_4)
+    conv1_4 = Dropout(0.5)(conv1_4)
 
+    conv5_1 = Conv2D(512,(3,3),activation='elu',kernel_initializer='he_normal',padding='same')(p4)
+    conv5_1 = Dropout(0.5)(conv5_1)
+    conv5_1 = Conv2D(512, (3, 3), activation='elu', kernel_initializer='he_normal', padding='same')(conv5_1)
+    conv5_1 = Dropout(0.5)(conv5_1)
 
+    up4_2 = Conv2DTranspose(filter_list[3],(2,2),(2,2),name='up42',padding='same')(conv5_1)
+    conv4_2= concatenate([up4_2,conv4_1],name='merge42',axis=3)
+    conv4_2 = Conv2D(256,(3,3),activation='elu',kernel_initializer='he_normal',padding='same')(conv4_2)
+    conv4_2 = Dropout(0.5)(conv4_2)
+    conv4_2 = Conv2D(256, (3, 3), activation='elu', kernel_initializer='he_normal', padding='same')(conv4_2)
+    conv4_2 = Dropout(0.5)(conv4_2)
 
+    up3_3 = Conv2DTranspose(filter_list[2],(2,2),(2,2),name='up33',padding='same')(conv4_2)
+    conv3_3 = concatenate([up3_3,conv3_1,conv3_2],name='merge33',axis=3)
+    conv3_3 = Conv2D(128,(3,3),activation='elu',kernel_initializer='he_normal',padding='same')(conv3_3)
+    conv3_3 = Dropout(0.5)(conv3_3)
+    conv3_3 = Conv2D(128, (3, 3), activation='elu', kernel_initializer='he_normal', padding='same')(conv3_3)
+    conv3_3 = Dropout(0.5)(conv3_3)
 
-    return s
-print(make_model().shape)
+    up2_4 = Conv2DTranspose(filter_list[1],(2,2),(2,2),name='up24',padding='same')(conv3_3)
+    conv2_4 = concatenate([up2_4,c2,conv2_2,conv2_3],name='merge24',axis=3)
+    conv2_4 = Conv2D(64,(3,3),activation='elu',kernel_initializer='he_normal',padding='same')(conv2_4)
+    conv2_4 = Dropout(0.5)(conv2_4)
+    conv2_4 = Conv2D(64, (3, 3), activation='elu', kernel_initializer='he_normal', padding='same')(conv2_4)
+    conv2_4 = Dropout(0.5)(conv2_4)
+
+    up1_5 = Conv2DTranspose(filter_list[0],(2,2),(2,2),name='up15',padding='same')(conv2_4)
+    conv1_5 = concatenate([up1_5,c1,c3,conv1_3,conv1_4],name='merge15',axis=3)
+    conv1_5 = Conv2D(32,(3,3),activation='elu',kernel_initializer='he_normal',padding='same')(conv1_5)
+    conv1_5 = Dropout(0.5)(conv1_5)
+    conv1_5 = Conv2D(32, (3, 3), activation='elu', kernel_initializer='he_normal', padding='same')(conv1_5)
+    conv1_5 = Dropout(0.5)(conv1_5)
+
+    nesnet_output = Conv2D(1,(1,1),activation='sigmoid',kernel_initializer='he_normal',name='output4',padding='same')(conv1_5)
+
+    model = Model([inputs,nesnet_output])
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),loss=utils.dice_coef_loss)
+
+    #tf.keras.utils.plot_model(model,show_shapes=False,show_dtype=False,show_layer_names=True,rankdir='TB',expand_nested=False,dpi=46,layer_range=None)
+    return model
+make_model()
 
 
 
