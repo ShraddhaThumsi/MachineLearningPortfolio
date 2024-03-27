@@ -138,13 +138,31 @@ def make_model(input_shape=(std_img_width,std_img_height,num_channels),filter_li
 
     nesnet_output = Conv2D(1,(1,1),activation='sigmoid',kernel_initializer='he_normal',name='output4',padding='same')(conv1_5)
 
-    model = Model([inputs,nesnet_output])
+    model = Model([inputs],[nesnet_output])
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),loss=utils.dice_coef_loss)
 
     #tf.keras.utils.plot_model(model,show_shapes=False,show_dtype=False,show_layer_names=True,rankdir='TB',expand_nested=False,dpi=46,layer_range=None)
     return model
-make_model()
-
+model = make_model()
+checkpoint = ModelCheckpoint('best_model.hdf5',
+                             monitor='val_loss',
+                             verbose=1,
+                             save_best_only=True,
+                             mode='min',
+                             save_weights_only=True,
+                             save_freq='epoch')
+reduce_lr = ReduceLROnPlateau(monitor='val_loss',
+                              factor=0.3,
+                              patience=5,
+                              min_lr=0.0005)
+callback_list = [checkpoint,reduce_lr]
+history = model.fit(train_generator,
+                    validation_data=val_generator,
+                    steps_per_epoch=len(X_train)/7,
+                    validation_steps=10,
+                    callbacks=callback_list,
+                    epochs=NUM_EPOCHS,
+                    verbose=1,)
 
 
 
