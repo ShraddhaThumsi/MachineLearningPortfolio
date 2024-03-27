@@ -6,10 +6,10 @@ import data_preparation
 import utils
 from tensorflow.keras.layers import *
 from tensorflow.keras.models import Model
-from tensorflow.keras import backend as K
+import skimage
 from tensorflow.keras.callbacks import LearningRateScheduler, ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
-
-
+import random
+import matplotlib.pyplot as plt
 
 
 X_data= data_preparation.X_data
@@ -156,13 +156,22 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss',
                               patience=5,
                               min_lr=0.0005)
 callback_list = [checkpoint,reduce_lr]
-history = model.fit(train_generator,
-                    validation_data=val_generator,
-                    steps_per_epoch=len(X_train)/7,
-                    validation_steps=10,
-                    callbacks=callback_list,
-                    epochs=NUM_EPOCHS,
-                    verbose=1,)
+# history = model.fit(train_generator,
+#                     validation_data=val_generator,
+#                     steps_per_epoch=len(X_train)/7,
+#                     validation_steps=10,
+#                     callbacks=callback_list,
+#                     epochs=NUM_EPOCHS,
+#                     verbose=1,)
 
-
-
+"""
+model = tf.create_model()
+model.load_weights('best_model.hdf5')
+Y_hat = model.predict(X_test, verbose=1)
+print(Y_hat.shape)
+idx = random.randint(0,100)
+print(X_test[idx].shape)
+skimage.io.imshow(X_test[idx])
+plt.show();
+skimage.io.imshow(Y_hat[idx][:,:,0])
+plt.show();"""
