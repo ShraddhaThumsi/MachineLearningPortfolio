@@ -1,6 +1,6 @@
 #reference https://medium.com/@abdualimov/unet-implementation-of-the-unet-architecture-on-tensorflow-for-segmentation-of-cell-nuclei-528b5b6e6ffd
 from sklearn.model_selection import train_test_split
-import task
+
 import data_preparation
 import utils
 from tensorflow.keras.layers import *
@@ -140,8 +140,8 @@ def make_model(input_shape=(std_img_width,std_img_height,num_channels),filter_li
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),loss=loss.SparseCategoricalCrossentropy(),metrics=['accuracy'])
 
     return model
-#model = make_model()
-checkpoint = ModelCheckpoint('best_model_unet.hdf5',
+model = make_model()
+checkpoint = ModelCheckpoint('best_model.hdf5',
                              monitor='val_loss',
                              verbose=1,
                              save_best_only=True,
@@ -160,7 +160,7 @@ callback_list = [checkpoint, reduce_lr]
 #                     callbacks=callback_list,
 #                     epochs=NUM_EPOCHS,
 #                     verbose=1, )
-best_model=load_model('best_model_unet.hdf5')
+best_model=load_model('best_model.hdf5')
 Y_hat = best_model.predict(X_test, verbose=1)
 print('model has predicted on test set')
 print(Y_hat.shape)
