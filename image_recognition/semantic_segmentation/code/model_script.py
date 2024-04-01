@@ -137,7 +137,7 @@ def make_model(input_shape=(std_img_width,std_img_height,num_channels),filter_li
     nesnet_output = Conv2D(1,(1,1),activation='sigmoid',kernel_initializer='he_normal',name='output4',padding='same')(conv1_5)
 
     model = Model([inputs],[nesnet_output])
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),loss=loss.SparseCategoricalCrossentropy(),metrics=['accuracy'])
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),loss='categorical_crossentropy',metrics=['accuracy'])
 
     return model
 model = make_model()
@@ -153,13 +153,13 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss',
                               patience=5,
                               min_lr=0.0005)
 callback_list = [checkpoint, reduce_lr]
-# history = model.fit(train_generator,
-#                     validation_data=val_generator,
-#                     steps_per_epoch=len(X_train) / 7,
-#                     validation_steps=10,
-#                     callbacks=callback_list,
-#                     epochs=NUM_EPOCHS,
-#                     verbose=1, )
+history = model.fit(train_generator,
+                    validation_data=val_generator,
+                    steps_per_epoch=len(X_train) / 7,
+                    validation_steps=10,
+                    callbacks=callback_list,
+                    epochs=NUM_EPOCHS,
+                    verbose=1, )
 best_model=load_model('best_model.hdf5')
 Y_hat = best_model.predict(X_test, verbose=1)
 print('model has predicted on test set')

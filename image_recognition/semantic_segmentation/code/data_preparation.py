@@ -1,6 +1,4 @@
 import os
-
-
 import skimage.io as io
 import skimage.transform as transform
 
