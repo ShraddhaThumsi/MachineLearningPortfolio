@@ -1,4 +1,6 @@
 #reference https://medium.com/@abdualimov/unet-implementation-of-the-unet-architecture-on-tensorflow-for-segmentation-of-cell-nuclei-528b5b6e6ffd
+#breast cancer data source https://www.kaggle.com/datasets/andrewmvd/breast-cancer-cell-segmentation
+#hippocampus data source - Medical segmentation decathlon http://medicaldecathlon.com
 from sklearn.model_selection import train_test_split
 
 import data_preparation
@@ -10,7 +12,7 @@ from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau
 from skimage.io import imshow
 import matplotlib.pyplot as plt
 import random
-import tensorflow.keras.losses as loss
+
 from keras.models import load_model
 X_data= data_preparation.X_data
 Y_data= data_preparation.Y_data
@@ -137,7 +139,7 @@ def make_model(input_shape=(std_img_width,std_img_height,num_channels),filter_li
     nesnet_output = Conv2D(1,(1,1),activation='sigmoid',kernel_initializer='he_normal',name='output4',padding='same')(conv1_5)
 
     model = Model([inputs],[nesnet_output])
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),loss='categorical_crossentropy',metrics=['accuracy'])
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),loss='categorical_crossentropy',metrics=['accuracy','mse'])
 
     return model
 model = make_model()
