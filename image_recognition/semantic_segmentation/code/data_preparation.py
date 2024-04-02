@@ -7,6 +7,7 @@ import imageio
 import skimage
 import numpy as np
 import matplotlib.pyplot as plt
+
 extn = 'png'
 width = 256
 height = 256
@@ -21,8 +22,8 @@ brca_image_path = '../data/breast_cancer_histopathology/Images/'
 brca_label_path = '../data/breast_cancer_histopathology/Masks/'
 
 hippo_rootpath = '../data/hippocampus/'
-hippo_image_path = '../data/hippocampus/imagesTr_original_data/'
-hippo_label_path = '../data/hippocampus/labelsTr_original_data/'
+hippo_image_path = '../data/hippocampus/imagesTr/'
+hippo_label_path = '../data/hippocampus/labelsTr/'
 def get_images(root_path,output_size,is_label=False,is_brca=False, is_hippocampus=False):
     img_paths = sorted([f'{root_path}{i}' for i in os.listdir(root_path)])
 
@@ -47,11 +48,11 @@ def get_images(root_path,output_size,is_label=False,is_brca=False, is_hippocampu
                 png_path = f'{name_only}.png'
                 nii_image = nibabel.load(filename)
 
-                nii_data = nii_image.get_fdata()
+                nii_data = nii_image.get_data()
                 nii_data = np.clip(nii_data, 0, 255).astype(np.uint8)
 
 
-                img = Image.fromarray(nii_data,'RGB')
+                img = Image.fromarray(nii_data,mode='RGB')
                 img.save(png_path)
                 return png_path
             else:
