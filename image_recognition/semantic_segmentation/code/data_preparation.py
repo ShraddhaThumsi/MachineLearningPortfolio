@@ -1,4 +1,6 @@
 import os
+
+import nibabel
 import skimage.io as io
 import skimage.transform as transform
 import imageio
@@ -12,14 +14,15 @@ path = f'../data/{extn}/'
 image_path = f'../data/{extn}/Original/'
 label_path = f'../data/{extn}/Ground Truth/'
 import random
+from PIL import Image
 
 brca_rootpath = '../data/breast_cancer_histopathology/'
 brca_image_path = '../data/breast_cancer_histopathology/Images/'
 brca_label_path = '../data/breast_cancer_histopathology/Masks/'
 
 hippo_rootpath = '../data/hippocampus/'
-hippo_image_path = '../data/hippocampus/imagesTr/'
-hippo_label_path = '../data/hippocampus/labelsTr/'
+hippo_image_path = '../data/hippocampus/imagesTr_original_data/'
+hippo_label_path = '../data/hippocampus/labelsTr_original_data/'
 def get_images(root_path,output_size,is_label=False,is_brca=False, is_hippocampus=False):
     img_paths = sorted([f'{root_path}{i}' for i in os.listdir(root_path)])
 
@@ -39,10 +42,22 @@ def get_images(root_path,output_size,is_label=False,is_brca=False, is_hippocampu
 
         hippo_image_paths = sorted([f'{root_path}{i}' for i in os.listdir(root_path)])
         def convert_file_to_png(filename):
-            return filename
-        unzipped_hippo_images = list(map(convert_file_to_png,hippo_image_paths))
-        print(unzipped_hippo_images[0:3])
-        print(type(unzipped_hippo_images))
+            if '.png' not in filename:
+                name_only = filename[:-4]
+                png_path = f'{name_only}.png'
+                nii_image = nibabel.load(filename)
+
+                nii_data = nii_image.get_fdata()
+                nii_data = np.clip(nii_data, 0, 255).astype(np.uint8)
+
+
+                img = Image.fromarray(nii_data,'RGB')
+                img.save(png_path)
+                return png_path
+            else:
+                return filename
+        img_paths = list(map(convert_file_to_png,hippo_image_paths))
+
 
 
 
@@ -71,9 +86,12 @@ X_data = get_images(image_path,(height,width))
 Y_data = get_images(label_path,(height,width),is_label=True)
 
 #importing hippocampal images
-#X_hippo_data = get_images(hippo_image_path,(height,width),is_hippocampus=True)
+X_hippo_data = get_images(hippo_image_path,(height,width),is_hippocampus=True)
 Y_hippo_data = get_images(hippo_label_path,(height,width),is_hippocampus=True,is_label=True)
-#print(X_hippo_data.shape)
+print('shape of x hippocampus data')
+print(X_hippo_data.shape)
+print('shape of y hippocampus data')
+print(Y_hippo_data.shape)
 
 #appending for larger dataset
 X_data = np.concatenate((X_data,X_brca_data),axis=0)
