@@ -37,27 +37,45 @@ def process_brca(root_path):
     return img_paths
 def process_hippo(root_path):
     hippo_image_paths = sorted([f'{root_path}{i}' for i in os.listdir(root_path)])
+    def is_nii(filename):
+        filename = filename.lower()
+        return filename.endswith('.nii')
+
+    img_paths = list(filter(is_nii, hippo_image_paths))
+
 
     def convert_file_to_png(filename):
-        image_data,image_header = load(filename)
+        image_data,_ = load(filename)
+        print("inside convert to png func")
+        print("checking if image is 3d or 2d")
+        print(len(image_data.shape))
+        print("dimensions of the image are: ")
+        print(f'{image_data.shape[0]} x {image_data.shape[1]}')
 
         return image_data
 
-    img_paths = list(map(convert_file_to_png, hippo_image_paths))
-    print(img_paths[0])
+    img_paths = list(map(convert_file_to_png, img_paths))
+    print('i have converted the images to png, now i want to see how many images are there')
+    print(type(img_paths))
+    print(len(img_paths))
+
+
+
     return img_paths
 
 def get_images(root_path,output_size,is_label=False,is_brca=False, is_hippocampus=False):
     img_paths = sorted([f'{root_path}{i}' for i in os.listdir(root_path)])
+
     if is_brca:
 
         #parses the breast cancer dataset. The folder contains only tif and .xml files so we have to read it along with cleaning up file names
         img_paths = process_brca(root_path)
 
     if is_hippocampus:
+
         img_paths = process_hippo(root_path)
-        print('inside hippocampus transformation condition')
-        print(len(img_paths[0]))
+
+
 
 
 
