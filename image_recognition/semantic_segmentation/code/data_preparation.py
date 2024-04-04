@@ -33,6 +33,10 @@ prostrate_rootpath = '../data/prostrate/'
 prostrate_image_path = f'{prostrate_rootpath}imagesTr/'
 prostrate_label_path = f'{prostrate_rootpath}labelsTr/'
 
+spleen_rootpath = '../data/spleen/'
+spleen_image_path = f'{spleen_rootpath}imagesTr/'
+spleen_label_path = f'{spleen_rootpath}labelsTr/'
+
 
 def process_brca(root_path):
     def is_tif_file(filename):
@@ -83,13 +87,14 @@ def get_images(root_path,output_size,is_label=False,tissue_type='colorectal'):
         'hippocampus'
         'heart'
         'prostrate'
+        'spleen'
     """
     if tissue_type=='breast cancer':
 
         #parses the breast cancer dataset. The folder contains only tif and .xml files so we have to read it along with cleaning up file names
         img_paths = process_brca(root_path)
 
-    if tissue_type in ['hippocampus','heart','prostrate']:
+    if tissue_type in ['hippocampus','heart','prostrate','spleen']:
 
         img_paths = process_nii_files(root_path)
 
@@ -146,9 +151,13 @@ print('shape of prostrate data')
 print(X_prostrate_data.shape)
 print(Y_prostrate_data.shape)
 
+#importing spleen images
+X_spleen_data = get_images(spleen_image_path,(height,width),tissue_type='spleen')
+Y_spleen_data = get_images(spleen_label_path,(height,width),tissue_type='spleen',is_label=True)
+
 #appending for larger dataset
-X_data = np.concatenate((X_data,X_brca_data,X_hippo_data,X_heart_data,X_prostrate_data),axis=0)
-Y_data = np.concatenate((Y_data,Y_brca_data,Y_hippo_data,Y_heart_data,Y_prostrate_data),axis=0)
+X_data = np.concatenate((X_data,X_brca_data,X_hippo_data,X_heart_data,X_prostrate_data,X_spleen_data),axis=0)
+Y_data = np.concatenate((Y_data,Y_brca_data,Y_hippo_data,Y_heart_data,Y_prostrate_data,Y_spleen_data),axis=0)
 print('shape of full data after concatenating various cancers data')
 print(X_data.shape)
 print(Y_data.shape)
