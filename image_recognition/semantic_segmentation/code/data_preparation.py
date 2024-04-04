@@ -47,11 +47,14 @@ def process_hippo(root_path):
 
     def convert_file_to_png(filename):
         image_data,_ = load(filename)
-
+        normalized_data = image_data / np.max(image_data)
+        cmap = plt.get_cmap('viridis')
+        rgb_data = cmap(normalized_data)[:,:,:3]
+        rgb_data = (rgb_data * 255.).astype(np.uint8)
         png_x = filename.replace('.nii','.png')
 
         png_filename = f'{png_x}'
-        plt.imsave(png_filename,image_data)
+        plt.imsave(png_filename,rgb_data)
         print(f"inside load .nii function, this is what im returning {png_x}")
         return png_x
 
