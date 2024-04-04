@@ -42,7 +42,8 @@ def process_hippo(root_path):
         return filename.endswith('.nii')
 
     img_paths = list(filter(is_nii, hippo_image_paths))
-
+    print('inside proces hippo function, need to see if the filter worked correctly')
+    print(img_paths[-1])
 
     def convert_file_to_png(filename):
         image_data,_ = load(filename)
@@ -51,16 +52,12 @@ def process_hippo(root_path):
 
         png_filename = f'{png_x}'
         plt.imsave(png_filename,image_data)
-        return image_data
+        print(f"inside load .nii function, this is what im returning {png_x}")
+        return png_x
 
     img_paths = list(map(convert_file_to_png, img_paths))
-    print('i have converted the images to png, now i want to see how many images are there')
-    print(type(img_paths))
-    print(len(img_paths))
 
-
-
-    return img_paths
+    return img_paths[-4:-1]
 
 def get_images(root_path,output_size,is_label=False,is_brca=False, is_hippocampus=False):
     img_paths = sorted([f'{root_path}{i}' for i in os.listdir(root_path)])
@@ -74,10 +71,13 @@ def get_images(root_path,output_size,is_label=False,is_brca=False, is_hippocampu
 
         img_paths = process_hippo(root_path)
 
+        print(img_paths)
+        print("i have successfully received the first image, i will now pass it to the next part")
 
 
 
 
+    print(f'is label? {is_label}')
     if is_label:
         #if it's the label dataset then we have to take it as a grayscale image, therefore only one channel is necessary
         data = np.array([skimage.transform.resize(io.imread(i_path, as_gray=True),
@@ -86,11 +86,14 @@ def get_images(root_path,output_size,is_label=False,is_brca=False, is_hippocampu
                                                     preserve_range=True)
                            for i_path in img_paths], dtype=np.uint8)
     else:
+        print('in img read subcondition')
+        print(img_paths)
         data = np.array([skimage.transform.resize(io.imread(i_path)[:,:,:3],
                                                 output_size,
                                                 mode='constant',
                                                 preserve_range=True)
                        for i_path in img_paths],dtype=np.uint8)
+        print(f'ideally, when data has been read properly, the final shape of data should be the following: {data.shape}')
     data = data.astype('float32') / 255.
     return data
 
