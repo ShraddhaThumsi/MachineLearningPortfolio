@@ -1,6 +1,7 @@
 #reference https://medium.com/@abdualimov/unet-implementation-of-the-unet-architecture-on-tensorflow-for-segmentation-of-cell-nuclei-528b5b6e6ffd
 #breast cancer data source https://www.kaggle.com/datasets/andrewmvd/breast-cancer-cell-segmentation
 #hippocampus data source - Medical segmentation decathlon http://medicaldecathlon.com
+#main inspiration for this project was ProjectPro Image Segmentation module. They had written it in Pytorch so I used existing Tensorflow equivivalents to compose my code.
 from sklearn.model_selection import train_test_split
 
 import data_preparation
