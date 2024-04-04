@@ -30,7 +30,7 @@ heart_image_path = f'{heart_rootpath}imagesTr/'
 heart_label_path = f'{heart_rootpath}labelsTr/'
 
 prostrate_rootpath = '../data/prostrate/'
-prostrate_image_path = f'{prostrate_rootpath}imagesTr'
+prostrate_image_path = f'{prostrate_rootpath}imagesTr/'
 prostrate_label_path = f'{prostrate_rootpath}labelsTr/'
 
 
