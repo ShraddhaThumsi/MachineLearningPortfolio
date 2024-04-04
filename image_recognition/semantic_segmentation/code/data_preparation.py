@@ -46,12 +46,11 @@ def process_hippo(root_path):
 
     def convert_file_to_png(filename):
         image_data,_ = load(filename)
-        print("inside convert to png func")
-        print("checking if image is 3d or 2d")
-        print(len(image_data.shape))
-        print("dimensions of the image are: ")
-        print(f'{image_data.shape[0]} x {image_data.shape[1]}')
 
+        png_x = filename.replace('.nii','.png')
+
+        png_filename = f'{png_x}'
+        plt.imsave(png_filename,image_data)
         return image_data
 
     img_paths = list(map(convert_file_to_png, img_paths))
