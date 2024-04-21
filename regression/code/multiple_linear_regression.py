@@ -51,3 +51,15 @@ x_train,x_test,y_train,y_test = train_test_split(X,y,train_size=0.75,test_size=0
 
 x_train_intercept = sm.add_constant(x_train)
 lr = sm.OLS(y_train,x_train_intercept).fit()
+
+plt.figure(figsize=(8, 6), dpi=80)
+x_test_with_intercept = sm.add_constant(x_test)
+y_test_fitted = lr.predict(x_test_with_intercept)
+
+
+#plot the scatter plot between the fitted values and actual test values for repsonse variable
+plt.scatter(y_test_fitted, y_test)
+plt.xlabel("Y Predicted")
+plt.ylabel("Y Actual")
+plt.title("Scatter plot between Fitted and Actual Test Values")
+plt.show()
