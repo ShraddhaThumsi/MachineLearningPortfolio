@@ -9,5 +9,9 @@ def clean_time_series(time_series_df,is_univariate=True):
     time_series_df.set_index('time',inplace=True)
     time_series_df = time_series_df.asfreq('H')
     time_series_df.IOT_Sensor_Reading = time_series_df.IOT_Sensor_Reading.fillna(method='ffill')
+    if is_univariate is False:
+        time_series_df.Error_Present = time_series_df.Error_Present.fillna(method='ffill')
+        time_series_df.Sensor_2 = time_series_df.Sensor_2.fillna(method='ffill')
+        time_series_df.Sensor_Value = time_series_df.Sensor_Value.fillna(method='ffill')
     time_series_df.reset_index(inplace=True)
     return time_series_df
