@@ -4,6 +4,7 @@ import numpy as np
 from datetime import datetime
 import utils.PreProcessTimeSeriesData as PreProcess
 import utils.EDA as EDA
+import utils.StationarityTests as Stationary
 path_to_input_file = './data/Data-Chillers.csv'
 sensor_data_df = pd.read_csv(path_to_input_file)
 processed_df = PreProcess.clean_time_series(sensor_data_df)
@@ -18,3 +19,4 @@ with open('./output/'+'covariance_log.txt','a') as f:
 sys.stdout =  sys.__stdout__
 
 components_plot = EDA.timeseries_eda(processed_df)
+stationarity_plot = Stationary.check_stationarity_tests(processed_df)
