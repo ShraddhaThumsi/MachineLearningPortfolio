@@ -1,20 +1,18 @@
 import os
-
-
 import skimage.io as io
 import skimage.transform as transform
-
 import skimage
 import numpy as np
 import matplotlib.pyplot as plt
 from medpy.io import load
+import random
 extn = 'png'
 width = 256
 height = 256
 path = f'../data/{extn}/'
 image_path = f'../data/{extn}/Original/'
 label_path = f'../data/{extn}/Ground Truth/'
-import random
+
 
 
 brca_rootpath = '../data/breast_cancer_histopathology/'
