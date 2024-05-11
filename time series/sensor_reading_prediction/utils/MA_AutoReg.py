@@ -31,12 +31,10 @@ def MA_model(df):
 
 
 def AR_model(df):
-    print('inside autoregressor function')
-    print(df.shape)
-    print(df.columns)
+
     # Create AR model
     order = 1  # Order of the AR model
-    model = ARIMA(df['IOT_Sensor_Reading'], order=(1,0,0))
+    model = AutoReg(df['IOT_Sensor_Reading'], lags=order)
 
     # Fit the model
     model_fit = model.fit()
@@ -45,7 +43,7 @@ def AR_model(df):
     fitted_values = model_fit.fittedvalues
 
     rmse = np.sqrt(mean_squared_error(df['IOT_Sensor_Reading'][:-1], fitted_values))
-    with open('../output/' + 'log.txt', 'a') as f:
+    with open('./output/' + 'log.txt', 'a') as f:
         sys.stdout = f
         print("***************************AR1 Model*******************************")
         print(f"RMSE of AR1 model: {rmse}")
@@ -53,14 +51,14 @@ def AR_model(df):
     sys.stdout = sys.__stdout__
 
     # Plot the original data and the fitted values
-    # plt.plot(df['IOT_Sensor_Reading'], label='Original Data')
-    # plt.plot(fitted_values, label='Fitted Values')
-    # plt.legend()
-    # plt.title('First-Order AR Model')
-    # plt.xlabel('Time')
-    # plt.ylabel('Value')
-    # plt.savefig('../output/' + 'AR_Model.png')
-    # plt.show()
+    plt.plot(df['IOT_Sensor_Reading'], label='Original Data')
+    plt.plot(fitted_values, label='Fitted Values')
+    plt.legend()
+    plt.title('First-Order AR Model')
+    plt.xlabel('Time')
+    plt.ylabel('Value')
+    plt.savefig('./output/' + 'AR_Model.png')
+    plt.show()
 
-    # Print model summary
+
     return plt.show()
