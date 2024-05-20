@@ -28,3 +28,7 @@ X_test_new=Models.concatenate_features(X_test_gene_onehot, X_test_variation_oneh
 print('shape of training data after feature concatenation',X_train_new.shape)
 print('shape of validation data after feature concatenation',X_val_new.shape)
 print('shape of testing data after feature concatenation',X_test_new.shape)
+print('now invoking baseline logistic regression model')
+print(Models.logistic_regression(X_train_new, y_train,loop='training'))
+print(Models.logistic_regression(X_val_new,y_val,loop='validation'))
+print(Models.logistic_regression(X_test_new,y_test,loop='test'))

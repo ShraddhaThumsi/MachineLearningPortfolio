@@ -4,12 +4,15 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 from sklearn import metrics
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 def evaluate_model(model,test_features,y_truth):
     prediction=model.predict(test_features)
-    metrics.confusion_matrix(y_truth,prediction)
+    sns.heatmap(metrics.confusion_matrix(y_truth,prediction),annot=True)
     predict_probabilities= model.predict_proba(test_features)
     logloss_metric=log_loss(y_truth,predict_probabilities)
+    plt.show()
     return logloss_metric
 
 def transform_features_into_numer(X_train,X_val,X_test):
@@ -56,3 +59,11 @@ def concatenate_features(gene_feature,variation_feature,text_feature,print_this=
     gene_variation_feature.reset_index(drop=True, inplace=True)
     gene_variation_text_feature=pd.concat([text_feature,gene_variation_feature],axis=1)
     return gene_variation_text_feature
+def logistic_regression(X_data,y_data,random_state=0,loop='training'):
+    model = LogisticRegression(random_state=random_state)
+    trained_log_model=model.fit(X_data,y_data)
+    training_error = evaluate_model(trained_log_model,X_data,y_data)
+    print(f'currently in {loop} loop')
+    print(f'log loss in this loop is : {training_error}')
+    return trained_log_model
+
