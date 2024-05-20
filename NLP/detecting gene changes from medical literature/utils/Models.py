@@ -6,6 +6,10 @@ from sklearn import metrics
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
 
 def evaluate_model(model,test_features,y_truth):
     prediction=model.predict(test_features)
@@ -66,4 +70,34 @@ def logistic_regression(X_data,y_data,random_state=0,loop='training'):
     print(f'currently in {loop} loop')
     print(f'log loss in this loop is : {training_error}')
     return trained_log_model
+
+def random_forest(X_data,y_data,random_state=0,max_depth=2,loop='training'):
+
+    random_forest_model=RandomForestClassifier(max_depth=max_depth,random_state=random_state)
+    random_forest_model.fit(X_data, y_data)
+    error = evaluate_model(random_forest_model,X_data,y_data)
+    print(f'the {loop} loop is in progress in the random forest and the error obtained is {error}')
+    return random_forest_model
+
+def naive_bayes(X_data,y_data,loop='training'):
+    gaussian_naivebayes_model = GaussianNB()
+    gaussian_naivebayes_model.fit(X_data,y_data)
+    error = evaluate_model(gaussian_naivebayes_model,X_data,y_data)
+    print(f'the {loop} loop is in progress in the naive bayes classifier, and the error obtained is {error}')
+    return gaussian_naivebayes_model
+
+def knn(X_data,y_data,loop='training'):
+    knn_model = KNeighborsClassifier(n_neighbors=9)
+    knn_model.fit(X_data,y_data)
+    error=evaluate_model(knn_model,X_data,y_data)
+    print(f'the {loop} loop is in progress in KNN and the error obtained is {error}')
+    return knn_model
+
+def support_vector_classifier(X_data,y_data,loop='training'):
+    support_vector_classifier_model = SVC(decision_function_shape='ovo',probability=True)
+    support_vector_classifier_model.fit(X_data,y_data)
+    error=evaluate_model(support_vector_classifier_model,X_data,y_data)
+    print(f'the {loop} loop is in progress in the support vector classifier, and the error obtained is {error}')
+    return support_vector_classifier_model
+
 
