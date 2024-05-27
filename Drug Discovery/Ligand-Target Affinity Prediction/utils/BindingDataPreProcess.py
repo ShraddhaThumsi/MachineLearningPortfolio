@@ -4,7 +4,7 @@ import tensorflow as tf
 import tensorflow_gnn as tfgnn
 from rdkit import Chem
 from rdkit.Chem import rdchem
-from transformers import BertTokenizer, TFBertModel
+
 import numpy as np
 
 def extract_ligand_data(df):
@@ -14,6 +14,7 @@ def extract_ligand_data(df):
     return df
 
 def smiles_to_molecule(smiles):
+    #reading SMILE data into a molecule
     try:
         mol = Chem.MolFromSmiles(smiles)
         if mol is None:
@@ -22,5 +23,17 @@ def smiles_to_molecule(smiles):
     except Exception as e:
         print(e)
         return None
+
+def protein_sequence_embeddings(df):
+    # Amino acids are represented by letters, so it is sufficient to represent the letters by integers 1 to 26
+    possible_letters_for_amino_acids='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    amino_acids_to_int = {aa:i+1 for i,aa in enumerate(possible_letters_for_amino_acids)}
+
+    def sequence_to_int(seq):
+        seq = seq.upper()
+        return [amino_acids_to_int[s] for s in seq if s in amino_acids_to_int]
+    df['amino_acid_numerical_representation'] = df['BindingDB Target Chain Sequence'].apply(sequence_to_int)
+
+    return df
 
 
