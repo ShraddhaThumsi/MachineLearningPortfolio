@@ -11,7 +11,7 @@ print(train_data.shape)
 print(train_data['Text'])
 y_true = train_data['Class'].astype(int)
 del train_data['Class']
-#data and code reference from ProjectPro
+#data and utils reference from ProjectPro
 #we want the same distribution on the train,validation and test sets, so we will split accordingly
 X_train, X_rem, y_train, y_rem = train_test_split(train_data, y_true, stratify=y_true, test_size=0.2)
 X_val, X_test, y_val, y_test = train_test_split(X_rem, y_rem, stratify=y_rem, test_size=0.5)
