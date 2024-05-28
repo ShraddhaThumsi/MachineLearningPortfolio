@@ -16,6 +16,8 @@ def evaluate_model(model,test_features,y_truth):
     sns.heatmap(metrics.confusion_matrix(y_truth,prediction),annot=True)
     predict_probabilities= model.predict_proba(test_features)
     logloss_metric=log_loss(y_truth,predict_probabilities)
+    #f1_score_per_classifier = metrics.f1_score(y_truth,prediction)
+    #print(f'the f1 score for the present classifier is: {f1_score_per_classifier}')
     plt.show()
     return logloss_metric
 
@@ -58,14 +60,17 @@ def concatenate_features(gene_feature,variation_feature,text_feature,print_this=
     print()
 
     '''Concatenate all extracted features together'''
-    gene_variation_feature=pd.concat([variation_feature,gene_feature],axis=1)
-    text_feature= pd.DataFrame(text_feature.toarray())
+
+    gene_variation_feature = pd.concat([variation_feature, gene_feature], axis=1)
+    text_feature = pd.DataFrame(text_feature.toarray())
     gene_variation_feature.reset_index(drop=True, inplace=True)
-    gene_variation_text_feature=pd.concat([text_feature,gene_variation_feature],axis=1)
+    gene_variation_text_feature = pd.concat([text_feature, gene_variation_feature], axis=1)
     return gene_variation_text_feature
 def logistic_regression(X_data,y_data,random_state=0,loop='training'):
     model = LogisticRegression(random_state=random_state)
+    print('ABOUT TO FIT LOGISTIC REGRESSION MODEL')
     trained_log_model=model.fit(X_data,y_data)
+    print('FINISHED FITTING LOGISTIC REGRESSION')
     training_error = evaluate_model(trained_log_model,X_data,y_data)
     print(f'currently in {loop} loop')
     print(f'log loss in this loop is : {training_error}')
