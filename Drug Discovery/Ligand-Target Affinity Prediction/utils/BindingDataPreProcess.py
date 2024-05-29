@@ -71,3 +71,69 @@ def molecule_to_graph(molecule):
         edge_features.append(get_bond_properties(bond))
     edge_features = np.array(edge_features)
     return node_features, adjacency_matrix, edge_features
+
+def create_graph_tensor(node_properties,adjacency_matrix,edge_properties):
+    num_of_nodes = node_properties.shape[0]
+    num_of_edges = edge_properties.shape[0]
+    edge_indices = np.vstack(np.where(adjacency_matrix)).T
+    graph_tensor = tfgnn.GraphTensor.from_pieces(
+        node_sets={'atoms': tfgnn.NodeSet.from_fields(features={'features': tf.convert_to_tensor(node_properties)},
+                                                      sizes=tf.constant([num_of_nodes]))},
+        edge_sets={'bonds': tfgnn.EdgeSet.from_fields(
+            features={'features': tf.convert_to_tensor(edge_properties)},
+            sizes=tf.constant([num_of_edges]),
+            adjacency=tfgnn.Adjacency.from_indices(
+                source=('atoms', tf.convert_to_tensor(edge_indices[:, 0], dtype=tf.int32)),
+                target=('atoms', tf.convert_to_tensor(edge_indices[:, 1], dtype=tf.int32))
+            )
+        )}
+    )
+    return graph_tensor
+
+def build_gnn_model():
+    input_graph = tf.keras.layers.Input(type_spec=tfgnn.GraphTensorSpec.from_piece_specs(
+        node_sets_spec={
+            'atoms': tfgnn.NodeSetSpec.from_field_specs(
+                features_spec={'features': tf.TensorSpec(shape=[None, 5], dtype=tf.float32)},
+                sizes_spec=tf.TensorSpec(shape=[None], dtype=tf.int32)
+            )
+        },
+        edge_sets_spec={
+            'bonds': tfgnn.EdgeSetSpec.from_field_specs(
+                features_spec={'features': tf.TensorSpec(shape=[None, 3], dtype=tf.float32)},
+                sizes_spec=tf.TensorSpec(shape=[None], dtype=tf.int32),
+                adjacency_spec=tfgnn.AdjacencySpec.from_field_specs(
+                    source_spec=tf.TensorSpec(shape=[None], dtype=tf.int32),
+                    target_spec=tf.TensorSpec(shape=[None], dtype=tf.int32)
+                )
+            )
+        }
+    ))
+
+
+    graph_update = tfgnn.keras.layers.GraphUpdate(
+        edge_sets={
+            'bonds': tfgnn.keras.layers.EdgeSetUpdate(
+                edge_input_feature_size=3,
+                next_state=tfgnn.keras.layers.SimpleConv(tf.constant([32]))
+            )
+        },
+        node_sets={
+            'atoms': tfgnn.keras.layers.NodeSetUpdate(
+                node_input_feature_size=5,
+                next_state=tfgnn.keras.layers.SimpleConv(tf.constant([32])))
+
+        }
+    )
+    graph_tensor = input_graph
+    graph_tensor = graph_update(graph_tensor)
+
+    readout = tfgnn.keras.layers.Pool('mean')
+    graph_tensor = readout(graph_tensor)
+
+    output = tf.keras.layers.Dense(8)(graph_tensor)
+
+    model = tf.keras.Model(inputs=input_graph, outputs=output)
+    model.compile(optimizer='adam', loss='mean_squared_error')
+
+    return model
