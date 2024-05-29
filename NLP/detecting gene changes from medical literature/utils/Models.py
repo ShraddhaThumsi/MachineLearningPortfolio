@@ -16,8 +16,8 @@ def evaluate_model(model,test_features,y_truth):
     sns.heatmap(metrics.confusion_matrix(y_truth,prediction),annot=True)
     predict_probabilities= model.predict_proba(test_features)
     logloss_metric=log_loss(y_truth,predict_probabilities)
-    #f1_score_per_classifier = metrics.f1_score(y_truth,prediction)
-    #print(f'the f1 score for the present classifier is: {f1_score_per_classifier}')
+    f1_score_per_classifier = metrics.f1_score(y_truth,prediction,average='macro')
+    print(f'the f1 score for the present classifier is: {f1_score_per_classifier}')
     plt.show()
     return logloss_metric
 

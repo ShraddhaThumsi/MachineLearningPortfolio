@@ -13,3 +13,4 @@ print(df.shape)
 df = LigandData.protein_sequence_embeddings(df)
 print('shape of df after extracting protein sequence embedding data')
 print(df.shape)
+
