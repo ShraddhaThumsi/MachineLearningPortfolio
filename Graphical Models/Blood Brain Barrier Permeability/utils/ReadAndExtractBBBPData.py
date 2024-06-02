@@ -1,11 +1,13 @@
 from rdkit import Chem
 import pandas as pd
 import numpy as np
+import tensorflow as tf
 #data source credits "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/BBBP.csv"
-#python code credits https://www.kaggle.com/code/thumsishraddha/week11-12-graph-neural-network-gnn/edit
-csv_path = '../data/BBBP.csv'
-df = pd.read_csv(csv_path,usecols=[1,2,3])
-print(df.shape)
+#python utils credits https://www.kaggle.com/code/thumsishraddha/week11-12-graph-neural-network-gnn/edit
+
+def readBBBdata(path):
+    df = pd.read_csv(path,usecols=[1,2,3])
+    return df
 
 def get_properties_of_atom(atom):
     return (['Atomic Degree',
@@ -27,7 +29,7 @@ def get_properties_of_atom(atom):
             atom.GetNumRadicalElectrons(),
             atom.GetFormalCharge(),
             atom.GetMass(),
-            atom.GetIsInRing()])
+            atom.IsInRing()])
 
 def get_properties_of_bond(bond):
     if bond is None:
@@ -42,7 +44,7 @@ def get_properties_of_bond(bond):
              bond.GetIsAromatic(),
              bond.GetIsConjugated,
              bond.GetStereo(),
-             bond.GetIsInRing()])
+             bond.IsInRing()])
 
 def get_molecule_from_smiles(smiles_string):
     return Chem.MolFromSmiles(smiles_string)
@@ -55,14 +57,16 @@ def construct_graph_from_molecule(molecule):
     num_atoms = molecule.GetNumAtoms()
     adjacency_matrix = np.zeros((num_atoms, num_atoms))
     for id,atom in enumerate(molecule.GetAtoms()):
-        atom_properties.append(get_properties_of_atom(atom))
+        atom_properties.append(get_properties_of_atom(atom)[1])
         adjacency_matrix[id,id]=1
         bond_properties.append(get_properties_of_bond(None))
         for n_id,neighbor in enumerate(atom.GetNeighbors()):
             bond=molecule.GetBondBetweenAtoms(atom.GetIdx(), neighbor.GetIdx())
-            bond_properties.append(get_properties_of_bond(bond))
-            atom_properties.append(get_properties_of_bond(neighbor))
+            bond_properties.append(get_properties_of_bond(bond)[1])
+            atom_properties.append(get_properties_of_atom(neighbor)[1])
             adjacency_matrix[id,n_id]=1
             adjacency_matrix[n_id,id]=1
 
-    return np.array(atom_properties),np.array(bond_properties),np.array(adjacency_matrix)
+    return (tf.ragged.constant(atom_properties),
+            tf.ragged.constant(bond_properties),
+            tf.ragged.constant(adjacency_matrix))
