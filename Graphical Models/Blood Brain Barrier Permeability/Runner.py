@@ -12,7 +12,7 @@ from rdkit.Chem import rdDepictor
 from rdkit.Chem.Draw import rdMolDraw2D
 from IPython.display import SVG
 import utils.ReadAndExtractBBBPData as DataReader
-from sklearn.model_selection import train_test_split
+import utils.PrepEvalModel as Modl
 np.random.seed(45)
 tf.random.set_seed(45)
 
@@ -26,19 +26,28 @@ print('trying to convert molecule object to graph')
 X = DataReader.consruct_graph_from_smiles(df['smiles'])
 y=df['p_np']
 print(type(X[0]))
-# df['graph_from_molecule']=df['molecule'].apply(DataReader.construct_graph_from_molecule)
-# X= df['graph_from_molecule']
-# y=df['p_np']
-# print('successfully converted molecule object to graph')
-#
-# X_train,X_rem,y_train,y_rem = train_test_split(X,y,test_size=0.2)
-# X_val,X_test,y_val,y_test = train_test_split(X_rem,y_rem,test_size=0.1)
-# print('shape of training set: ',X_train.shape)
-# print('shape of validation set: ',X_val.shape)
-# print('shape of test set: ',X_test.shape)
-# print(type(list(X_train)[0][0]))
-# print(f"Name:\t{df.name[100]}\nSMILES:\t{df.smiles[100]}\nBBBP:\t{df.p_np[100]}")
-# molecule = DataReader.get_molecule_from_smiles(df.iloc[100].smiles)
-# print("Molecule:")
-# print(molecule)
-#
+# Shuffle array of indices ranging from 0 to 2049
+permuted_indices = np.random.permutation(np.arange(df.shape[0]))
+
+# Train set: 80 % of data
+train_index = permuted_indices[: int(df.shape[0] * 0.8)]
+x_train = DataReader.consruct_graph_from_smiles(df.iloc[train_index].smiles)
+y_train = df.iloc[train_index].p_np
+print(type(x_train))
+print(type(list(x_train)[0]))
+print('shape of training set: ', x_train[0].shape)
+
+# Valid set: 19 % of data
+valid_index = permuted_indices[int(df.shape[0] * 0.8) : int(df.shape[0] * 0.99)]
+x_valid =DataReader.consruct_graph_from_smiles(df.iloc[valid_index].smiles)
+y_valid = df.iloc[valid_index].p_np
+print('shape of validation set: ', x_valid[0].shape)
+
+
+# Test set: 1 % of data
+test_index = permuted_indices[int(df.shape[0] * 0.99) :]
+x_test = DataReader.consruct_graph_from_smiles(df.iloc[test_index].smiles)
+y_test = df.iloc[test_index].p_np
+print('shape of testing set: ', x_test[0].shape)
+
+Modl.prepare_batch(x_train,y_train)
