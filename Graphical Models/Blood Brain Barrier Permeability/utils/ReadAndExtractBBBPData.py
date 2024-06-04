@@ -49,19 +49,29 @@ def construct_graph_from_molecule(molecule):
     bond_properties = []
 
     num_atoms = molecule.GetNumAtoms()
-    adjacency_matrix = np.zeros((num_atoms, num_atoms))
+    pair_indices=[]
     for id,atom in enumerate(molecule.GetAtoms()):
         atom_properties.append(get_properties_of_atom(atom)[1])
-        adjacency_matrix[id,id]=1
+        pair_indices.append([atom.GetIdx(),atom.GetIdx()])
         #bond_properties.append(get_properties_of_bond(None))
         for n_id,neighbor in enumerate(atom.GetNeighbors()):
             bond=molecule.GetBondBetweenAtoms(atom.GetIdx(), neighbor.GetIdx())
             bond_properties.append(get_properties_of_bond(bond)[1])
             atom_properties.append(get_properties_of_atom(neighbor)[1])
-            adjacency_matrix[id,n_id]=1
-            adjacency_matrix[n_id,id]=1
+            pair_indices.append([atom.GetIdx(), neighbor.GetIdx()])
+    return np.array(atom_properties), np.array(bond_properties),np.array(pair_indices)
+def consruct_graph_from_smiles(list_of_smiles):
+    all_molecules_atom_properties = []
+    all_molecules_bond_properties = []
+    all_molecules_pair_indices_list=[]
+    for smiles in list_of_smiles:
+        molecule = get_molecule_from_smiles(smiles)
+        permol_atom_prop,permol_bond_prop,permol_pairs = construct_graph_from_molecule(molecule)
+        all_molecules_atom_properties.append(permol_atom_prop)
+        all_molecules_bond_properties.append(permol_bond_prop)
+        all_molecules_pair_indices_list.append(permol_pairs)
 
-    return (tf.ragged.constant(atom_properties,dtype=tf.float32),
-            tf.ragged.constant(bond_properties,dtype=tf.float32),
-            tf.ragged.constant(adjacency_matrix,dtype=tf.float32)
+    return (tf.ragged.constant(all_molecules_atom_properties,dtype=tf.float32),
+            tf.ragged.constant(all_molecules_bond_properties,dtype=tf.float32),
+            tf.ragged.constant(all_molecules_pair_indices_list,dtype=tf.float32)
             )
