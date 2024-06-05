@@ -58,8 +58,9 @@ def construct_graph_from_molecule(molecule):
             bond=molecule.GetBondBetweenAtoms(atom.GetIdx(), neighbor.GetIdx())
             bond_properties.append(get_properties_of_bond(bond)[1])
             atom_properties.append(get_properties_of_atom(neighbor)[1])
-            pair_indices.append([atom.GetIdx(), neighbor.GetIdx()])
-    return np.array(atom_properties), np.array(bond_properties),np.array(pair_indices)
+
+            pair_indices.append([float(atom.GetIdx()), float(neighbor.GetIdx())])
+    return np.array(atom_properties).astype('float32'), np.array(bond_properties).astype('float32'),np.array(pair_indices).astype('float32')
 def consruct_graph_from_smiles(list_of_smiles):
     all_molecules_atom_properties = []
     all_molecules_bond_properties = []

@@ -33,21 +33,31 @@ permuted_indices = np.random.permutation(np.arange(df.shape[0]))
 train_index = permuted_indices[: int(df.shape[0] * 0.8)]
 x_train = DataReader.consruct_graph_from_smiles(df.iloc[train_index].smiles)
 y_train = df.iloc[train_index].p_np
+y_train = y_train.astype('float32')
 print(type(x_train))
 print(type(list(x_train)[0]))
-print('shape of training set: ', x_train[0].shape)
+
 
 # Valid set: 19 % of data
 valid_index = permuted_indices[int(df.shape[0] * 0.8) : int(df.shape[0] * 0.99)]
 x_valid =DataReader.consruct_graph_from_smiles(df.iloc[valid_index].smiles)
 y_valid = df.iloc[valid_index].p_np
-print('shape of validation set: ', x_valid[0].shape)
+y_valid = y_valid.astype('float32')
+
 
 
 # Test set: 1 % of data
 test_index = permuted_indices[int(df.shape[0] * 0.99) :]
 x_test = DataReader.consruct_graph_from_smiles(df.iloc[test_index].smiles)
 y_test = df.iloc[test_index].p_np
-print('shape of testing set: ', x_test[0].shape)
+y_test = y_test.astype('float32')
 
-Modl.prepare_batch(x_train,y_train)
+
+
+
+train_dataset = Modl.MPNNDataset(x_train,y_train)
+
+validation_dataset = Modl.MPNNDataset(x_valid,y_valid)
+
+test_dataset = Modl.MPNNDataset(x_test,y_test)
+
