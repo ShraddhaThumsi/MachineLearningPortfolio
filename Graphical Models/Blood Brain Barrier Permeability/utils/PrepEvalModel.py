@@ -46,3 +46,50 @@ def MPNNDataset(X, y, batch_size=32, shuffle=False):
     return dataset.batch(batch_size).map(
         prepare_batch, num_parallel_calls=tf.data.AUTOTUNE
     )
+
+class EdgeNetwork(tf.keras.layers.Layer):
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+    def build(self,input_shape):
+        self.atom_dim = input_shape[0][-1]
+        self.bond_dim = input_shape[1][-1]
+        self.kernel = self.add_weight(
+            shape=(self.bond_dim,self.atom_dim*self.atom_dim),
+            trainable=True,
+            initializer='glorot_uniform'
+        )
+        self.bias=self.add_weight(
+            shape=(self.atom_dim*self.atom_dim),
+            trainable=True,
+            initializer='zeros'
+        )
+        self.built = True
+    def call(self,inputs):
+        atom_features,bond_features,pair_indices=inputs
+        bond_features=tf.matmul(bond_features,self.kernel)+self.bias
+        bond_features=tf.reshape(bond_features,(-1,self.atom_dim,self.atom_dim))
+        atom_features_neighbors=tf.gather(atom_features,pair_indices[:,1])
+        atom_features_neighbors=tf.expand_dims(atom_features_neighbors,axis=-1)
+        transformed_features=tf.matmul(bond_features,atom_features_neighbors)
+        transformed_features=tf.squeeze(transformed_features,axis=-1)
+        aggregated_features=tf.math.segment_sum(transformed_features,pair_indices[:,0])
+        return aggregated_features
+
+class MessagePassing(tf.keras.layers.Layer):
+    def __init__(self,units,steps=4,**kwargs):
+        super().__init__(**kwargs)
+        self.units=units
+        self.steps=steps
+    def build(self,input_shape):
+        self.atom_dim = input_shape[0][-1]
+        self.message_step=EdgeNetwork()
+        self.pad_length=max(0,self.units-self.atom_dim)
+        self.update_step=tf.keras.layers.GRUCell(self.atom_dim+self.pad_dim)
+        self.built=True
+    def call(self,inputs):
+        atom_features,bond_features,pair_indices=inputs
+        atom_features_updated=tf.pad(atom_features,[(0,0),(0,self.pad_length)])
+        for i in range(self.steps):
+            atom_features_aggregated=self.message_step([atom_features_updated,bond_features,pair_indices])
+            atom_features_updated,_=self.update_step(atom_features_aggregated,atom_features_updated)
+        return atom_features_updated
