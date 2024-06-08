@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 #data source credits "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/BBBP.csv"
-#python utils credits https://www.kaggle.com/code/thumsishraddha/week11-12-graph-neural-network-gnn/edit
 
 def readBBBdata(path):
     df = pd.read_csv(path,usecols=[1,2,3])

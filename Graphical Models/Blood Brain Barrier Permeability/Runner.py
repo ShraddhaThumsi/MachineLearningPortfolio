@@ -60,4 +60,9 @@ train_dataset = Modl.MPNNDataset(x_train,y_train)
 validation_dataset = Modl.MPNNDataset(x_valid,y_valid)
 
 test_dataset = Modl.MPNNDataset(x_test,y_test)
+mpnn = Modl.MPNNModel(
+    atom_dim=x_train[0][0][0].shape, bond_dim=x_train[1][0][0].shape,
+)
+mpnn.compile(loss=tf.keras.losses.BinaryCrossentropy(),optimizer=tf.keras.optimizers.Adam(learning_rate=5e-4),
+             metrics=[keras.metrics.AUC(name='AUC')])
 
