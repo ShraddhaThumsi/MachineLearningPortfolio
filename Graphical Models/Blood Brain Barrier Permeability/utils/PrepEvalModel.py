@@ -39,6 +39,11 @@ def prepare_batch(x_batch, y_batch):
 
 
 def MPNNDataset(X, y, batch_size=32, shuffle=False):
+    print('inside mpnn dataset function')
+    print('trying to debug the shape problem')
+    print('shape of x', X[0].shape)
+    print(type(X[1]))
+    print('shape of y', y.shape)
     dataset = tf.data.Dataset.from_tensor_slices((X, (y)))
 
     if shuffle:

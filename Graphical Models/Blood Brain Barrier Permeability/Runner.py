@@ -56,7 +56,7 @@ y_test = y_test.astype('float32')
 
 
 train_dataset = Modl.MPNNDataset(x_train,y_train)
-
+print(type(train_dataset))
 validation_dataset = Modl.MPNNDataset(x_valid,y_valid)
 
 test_dataset = Modl.MPNNDataset(x_test,y_test)
@@ -66,3 +66,10 @@ mpnn = Modl.MPNNModel(
 mpnn.compile(loss=tf.keras.losses.BinaryCrossentropy(),optimizer=tf.keras.optimizers.Adam(learning_rate=5e-4),
              metrics=[keras.metrics.AUC(name='AUC')])
 
+history = mpnn.fit(
+    train_dataset,
+    validation_data=validation_dataset,
+    epochs=10,
+    verbose=2,
+    class_weight={0: 2.0, 1: 0.5},
+)
