@@ -24,14 +24,15 @@ def prepare_batch(x_batch, y_batch):
     increment = tf.pad(
         tf.gather(increment, bond_partition_indices), [(num_bonds[0], 0)]
     )
+    # Ensure increment is correctly shaped before addition
+
+
 
     pair_indices = pair_indices.merge_dims(outer_axis=0, inner_axis=1).to_tensor()
-    print('inside prepare_batch function, checking datatype of pair_indices')
-    print(type(pair_indices))
-    print('checking type of increment object')
-    print(type(increment[:, tf.newaxis]))
+    increment = tf.pad(increment, [[0, tf.shape(pair_indices)[0] - tf.shape(increment)[0]]])
+
     pair_indices = pair_indices + increment[:, tf.newaxis]
-    print('converted pair indices to float successfully and also appended increment object')
+
     atom_features = atom_features.merge_dims(outer_axis=0, inner_axis=1).to_tensor()
     bond_features = bond_features.merge_dims(outer_axis=0, inner_axis=1).to_tensor()
 
@@ -39,13 +40,9 @@ def prepare_batch(x_batch, y_batch):
 
 
 def MPNNDataset(X, y, batch_size=32, shuffle=False):
-    print('inside mpnn dataset function')
-    print('trying to debug the shape problem')
-    print('shape of x', X[0].shape)
-    print(type(X[1]))
-    print('shape of y', y.shape)
-    dataset = tf.data.Dataset.from_tensor_slices((X, (y)))
 
+    dataset = tf.data.Dataset.from_tensor_slices((X, (y)))
+    print('got the data in tf dataset format from slices, and its shape is', tf.data.experimental.cardinality(dataset))
     if shuffle:
         dataset = dataset.shuffle(1024)
     return dataset.batch(batch_size).map(
@@ -72,12 +69,16 @@ class EdgeNetwork(tf.keras.layers.Layer):
     def call(self,inputs):
         atom_features,bond_features,pair_indices=inputs
         bond_features=tf.matmul(bond_features,self.kernel)+self.bias
+
         bond_features=tf.reshape(bond_features,(-1,self.atom_dim,self.atom_dim))
+
         atom_features_neighbors=tf.gather(atom_features,pair_indices[:,1])
         atom_features_neighbors=tf.expand_dims(atom_features_neighbors,axis=-1)
         transformed_features=tf.matmul(bond_features,atom_features_neighbors)
         transformed_features=tf.squeeze(transformed_features,axis=-1)
         aggregated_features=tf.math.segment_sum(transformed_features,pair_indices[:,0])
+        print('im about to return the aggregated features object,but before that, its shape is: ',
+              aggregated_features.shape)
         return aggregated_features
 
 class MessagePassing(tf.keras.layers.Layer):
@@ -164,25 +165,26 @@ def MPNNModel(
     atom_partition_indices = tf.keras.layers.Input(
         (), dtype="int32", name="atom_partition_indices"
     )
-
+    print('inside MPNN Model function, finished preparing atom_partition_indices, now about to invoke MessagePassing')
     x = MessagePassing(message_units, message_steps)(
         [atom_features, bond_features, pair_indices]
     )
-
+    print('invoked message passing successfully, now onto partition padding')
     x = PartitionPadding(batch_size)([x, atom_partition_indices])
-
-    x = tf.keras.layers.Masking()(x)
+    print('invoked partition padding successfully, now onto transformer encoder')
+    #x = tf.keras.layers.Masking()(x)
 
     x = TransformerEncoder(num_attention_heads, message_units, dense_units)(x)
-
+    print('invoked transformer encoder successfully, GlobalAveragePooling1D')
     x = tf.keras.layers.GlobalAveragePooling1D()(x)
     x = tf.keras.layers.Dense(dense_units, activation="relu")(x)
     x = tf.keras.layers.Dense(1, activation="sigmoid")(x)
-
+    print('all layers prepared successfully, now making model object')
     model = tf.keras.Model(
         inputs=[atom_features, bond_features, pair_indices, atom_partition_indices],
         outputs=[x],
     )
+    print('made model object successfully, now returning it ')
     return model
 
 

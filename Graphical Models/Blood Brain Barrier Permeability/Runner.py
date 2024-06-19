@@ -19,13 +19,14 @@ tf.random.set_seed(45)
 csv_path = './data/BBBP.csv'
 df = DataReader.readBBBdata(csv_path)
 
+
 df['molecule'] = df['smiles'].apply(DataReader.get_molecule_from_smiles)
 
 df = df[df['molecule'].notna()]
-print('trying to convert molecule object to graph')
+
 X = DataReader.consruct_graph_from_smiles(df['smiles'])
 y=df['p_np']
-print(type(X[0]))
+
 # Shuffle array of indices ranging from 0 to 2049
 permuted_indices = np.random.permutation(np.arange(df.shape[0]))
 
@@ -34,8 +35,7 @@ train_index = permuted_indices[: int(df.shape[0] * 0.8)]
 x_train = DataReader.consruct_graph_from_smiles(df.iloc[train_index].smiles)
 y_train = df.iloc[train_index].p_np
 y_train = y_train.astype('float32')
-print(type(x_train))
-print(type(list(x_train)[0]))
+
 
 
 # Valid set: 19 % of data
@@ -56,16 +56,15 @@ y_test = y_test.astype('float32')
 
 
 train_dataset = Modl.MPNNDataset(x_train,y_train)
-print(type(train_dataset))
+
 validation_dataset = Modl.MPNNDataset(x_valid,y_valid)
 
 test_dataset = Modl.MPNNDataset(x_test,y_test)
 mpnn = Modl.MPNNModel(
     atom_dim=x_train[0][0][0].shape, bond_dim=x_train[1][0][0].shape,
 )
-mpnn.compile(loss=tf.keras.losses.BinaryCrossentropy(),optimizer=tf.keras.optimizers.Adam(learning_rate=5e-4),
-             metrics=[keras.metrics.AUC(name='AUC')])
-
+mpnn.compile(loss=tf.keras.losses.BinaryCrossentropy(),optimizer=tf.keras.optimizers.Adam(learning_rate=5e-4),metrics=[keras.metrics.AUC(name="AUC")])
+print('model compilation is complete')
 history = mpnn.fit(
     train_dataset,
     validation_data=validation_dataset,
@@ -73,3 +72,10 @@ history = mpnn.fit(
     verbose=2,
     class_weight={0: 2.0, 1: 0.5},
 )
+
+molecules = [DataReader.consruct_graph_from_smiles(df.smiles.values[index]) for index in test_index]
+y_true = [df.p_np.values[index] for index in test_index]
+y_pred = tf.squeeze(mpnn.predict(test_dataset), axis=1)
+
+legends = [f"y_true/y_pred = {y_true[i]}/{y_pred[i]:.2f}" for i in range(len(y_true))]
+MolsToGridImage(molecules, molsPerRow=4, legends=legends)
