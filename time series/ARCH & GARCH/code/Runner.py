@@ -1,0 +1,7 @@
+import ReadAndProcessStockPriceData as NiftyReader
+import PredictNifty50FuturePrices as Predictor
+source_of_csv = '/Users/shraddha/datascience/python_code/MachineLearningPortfolio/time series/ARCH & GARCH/data/NIFTY 50'
+path_to_output = '/Users/shraddha/datascience/python_code/MachineLearningPortfolio/time series/ARCH & GARCH/output'
+nifty_timeseries_df_per_company = NiftyReader.make_dataset(source_of_csv,path_to_output)
+print(type(nifty_timeseries_df_per_company))
+train,test=Predictor.split_train_test(nifty_timeseries_df_per_company['TATA CONSUMER PRODUCTS'])
