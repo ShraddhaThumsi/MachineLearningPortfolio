@@ -6,3 +6,4 @@ nifty_timeseries_df_per_company = NiftyReader.make_dataset(source_of_csv,path_to
 print(type(nifty_timeseries_df_per_company))
 train,test=Predictor.split_train_test(nifty_timeseries_df_per_company['TATA CONSUMER PRODUCTS'])
 Predictor.calculate_pct_change_in_volatility(train,path_to_output)
+trained_arch1_model = Predictor.make_arch_model(train,path_to_output)

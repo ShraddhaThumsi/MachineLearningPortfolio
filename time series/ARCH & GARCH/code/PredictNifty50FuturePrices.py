@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import statsmodels.graphics.tsaplots as sgt
+from arch import arch_model
 def split_train_test(df,test_size=0.2):
     test_index = round(test_size*df.shape[0])
     df_train=df[:-test_index]
@@ -33,4 +34,30 @@ def calculate_pct_change_in_volatility(df,path_to_output):
     plt.close()
     plt.show()
 
+
+def make_arch_model(df,path_to_output):
+    #combination 1 - Default parameters
+    file=open(path_to_output+'/logs/' + 'arch_model_default.txt','w')
+    model_arch_1 = arch_model(df['returns'][1:])
+    results_arch1 = model_arch_1.fit(update_freq=5)
+    file.write(str(results_arch1.summary()))
+    file.close()
+    print(results_arch1.summary())
+
+    file = open(path_to_output+'/logs/' + 'arch_model_meanconst_volarch_p1_distnorm.txt','w')
+    model_arch_1 = arch_model(df['returns'][1:],mean='Constant',vol='ARCH',p=1,dist='normal')
+    results_arch1 = model_arch_1.fit(update_freq=5)
+    file.write(str(results_arch1.summary()))
+    file.close()
+    print(results_arch1.summary())
+
+    file = open(path_to_output + '/logs/' + 'arch_model_meanconst_volarch_p4_distnorm.txt', 'w')
+    model_arch_1 = arch_model(df['returns'][1:], mean='Constant', vol='ARCH', p=4, dist='normal')
+    results_arch1 = model_arch_1.fit(update_freq=5)
+    file.write(str(results_arch1.summary()))
+    file.close()
+    print(results_arch1.summary())
+
+    #the best model will be returned. By increasing the p value which is number of lags, we see that past 4th lag the results are not statistically significant, therefore we will stop at p=4.
+    return results_arch1
 
