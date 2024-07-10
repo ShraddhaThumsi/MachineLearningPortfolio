@@ -61,3 +61,13 @@ def make_arch_model(df,path_to_output):
     #the best model will be returned. By increasing the p value which is number of lags, we see that past 4th lag the results are not statistically significant, therefore we will stop at p=4.
     return results_arch1
 
+def make_garch_model(df, path_to_output):
+    file=open(path_to_output+'/logs/'+'garch_1_1.txt','w')
+    model_garch_1_1 = arch_model(df['returns'][1:],mean='Constant',vol='GARCH',p=1,q=1,dist='normal')
+    results_garch_1_1 =model_garch_1_1.fit(update_freq=5)
+    file.write(str(results_garch_1_1))
+    file.close()
+    print(results_garch_1_1.summary())
+
+
+    return results_garch_1_1
