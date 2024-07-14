@@ -68,6 +68,4 @@ def make_garch_model(df, path_to_output):
     file.write(str(results_garch_1_1))
     file.close()
     print(results_garch_1_1.summary())
-
-
     return results_garch_1_1
