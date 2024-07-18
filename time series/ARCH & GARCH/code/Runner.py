@@ -10,10 +10,10 @@ source_of_csv = '/Users/shraddha/datascience/python_code/MachineLearningPortfoli
 path_to_output = '/Users/shraddha/datascience/python_code/MachineLearningPortfolio/time series/ARCH & GARCH/output'
 nifty_timeseries_df_per_company = NiftyReader.make_dataset(source_of_csv,path_to_output)
 
-horizons=30
+horizons=100
 #list_of_companies_to_use = ['ADANI_PORTS','ADANI_ENTERPRISES','APOLLO HOSPITALS']
-#list_of_companies_to_use = ['ADANI_ENTERPRISES']
-list_of_companies_to_use = list(nifty_timeseries_df_per_company.keys())
+list_of_companies_to_use = ['ADANI_ENTERPRISES']
+#list_of_companies_to_use = list(nifty_timeseries_df_per_company.keys())
 #column_to_use = 'VWAP'
 #column_to_use = 'Adj Close'
 column_to_use='Close'
@@ -32,10 +32,10 @@ for company in list_of_companies_to_use:
 
     returns = (np.diff(company_wise_data[column_to_use]) / company_wise_data[column_to_use][:-1])
     print(returns)
-    garch_volatilities = MktSimUtils.garch_forecast(returns, horizons)
+    garch_volatilities = MktSimUtils.garch_forecast(returns, horizons,p=3,q=3)
     print(f'garch volatilities are : {garch_volatilities}')
 
-    arch_volatilities=MktSimUtils.garch_forecast(returns, horizons,is_garch=False)
+    arch_volatilities=MktSimUtils.garch_forecast(returns, horizons,is_garch=False,p=3)
     print(f'arch volatilities are : {arch_volatilities}')
 
     current_price = company_wise_data[column_to_use][-1]

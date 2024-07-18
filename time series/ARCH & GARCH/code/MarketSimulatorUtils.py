@@ -14,12 +14,12 @@ def get_arima_forecast(prices,horizons):
     forecast=model_fit.predict(steps=horizons)
     return forecast
 
-def garch_forecast(returns,horizons,is_garch=True,lags=1):
+def garch_forecast(returns,horizons,is_garch=True,p=1,q=1):
     if is_garch:
 
-        model = arch_model(returns,vol='GARCH',p=lags,q=1)
+        model = arch_model(returns,vol='GARCH',p=p,q=q)
     else:
-        model = arch_model(returns, vol='ARCH',p=lags)
+        model = arch_model(returns, vol='ARCH',p=p)
     model_fit=model.fit()
     forecast = model_fit.forecast(horizon=horizons)
     return forecast.variance.values[-1]
