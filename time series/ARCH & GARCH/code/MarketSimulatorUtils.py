@@ -1,6 +1,8 @@
 import numpy as np
 from arch import arch_model
 from statsmodels.tsa.arima.model import ARIMA
+from sklearn.metrics import mean_squared_error, mean_absolute_error, f1_score
+
 def calculate_future_prices(current_price,future_volatilities,mu):
     future_prices = []
     for next_day_vol in future_volatilities:
@@ -23,3 +25,10 @@ def garch_forecast(returns,horizons,is_garch=True,p=1,q=1):
     model_fit=model.fit()
     forecast = model_fit.forecast(horizon=horizons)
     return forecast.variance.values[-1]
+
+def evaluate_model(y_true,y_pred):
+    rmse = np.sqrt(mean_squared_error(y_true, y_pred))
+    mae = mean_absolute_error(y_true, y_pred)
+
+    print('RMSE is {}'.format(rmse))
+    print('MAE is {}'.format(mae))
