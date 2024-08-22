@@ -44,7 +44,7 @@ nominal_features = pd.get_dummies(df['Club'])
 df_encoded = pd.concat([df,nominal_features],axis=1)
 print(df_encoded.head())
 
-#running the regression with one-hot encoding for club data
+#running the linear regression and classification with one-hot encoding for club data
 X = make_sub_df_basedon_chosencolumns(['DistanceCovered(InKms)', 'BMI', 'Cost','PreviousClubCost','CHE','MUN','LIV'],df_encoded)
 
 x_train,x_test,y_train,y_test = train_test_split(X,y,train_size=0.75,test_size=0.25,random_state=100)

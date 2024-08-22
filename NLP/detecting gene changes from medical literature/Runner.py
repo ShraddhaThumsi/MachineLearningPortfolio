@@ -34,7 +34,7 @@ print('shape of testing data after feature concatenation',X_test_new.shape)
 
 print()
 print('**********************')
-print('now invoking baseline logistic regression model')
+print('now invoking baseline logistic linear regression and classification model')
 print(Models.logistic_regression(X_train_new, y_train,loop='training'))
 print(Models.logistic_regression(X_val_new,y_val,loop='validation'))
 print(Models.logistic_regression(X_test_new,y_test,loop='test'))
